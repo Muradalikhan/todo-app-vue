@@ -1,22 +1,25 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
+  <img alt="Vue logo" src="./assets/logo.png" width="100" height="100">
   <HelloWorld msg="Welcome to Your Vue.js App" />
   <h3>{{ counter }}</h3>
   <AppButton label="Increment" :handle-click="incrementCounter" />
   <AppButton label="Decrement" :handle-click="decrementCounter" />
 
   <h1>Users</h1>
-  <input type="text" placeholder="username" v-model="addUser.name" />
-  <input type="number" placeholder="age" v-model="addUser.age" />
-
-  <AppButton label="Add user" :handle-click="addUserToList" />
-  <ul>
+  <form @submit.prevent="addUserToList" class="form">
+    <TextField type="text" name="name" placeholder="name" v-model="user.name" />
+    <TextField type="text" name="website" placeholder="website" v-model="user.website" />
+    <AppButton label="Add user" type="submit" />
+  </form>
+  <h3 v-if="loading">Loading...</h3>
+  <ul v-if="!loading">
     <li v-for="(user, index) in users" :key="index">
-      <p> {{ user.name }} - {{ user.age }}</p>
+      <p> {{ user.name }} - {{ user.website }}</p>
       <AppButton :handle-click="() => editUser(index)" label="Edit" />
       <AppButton :handle-click="() => deleteUser(index)" label="Delete" />
     </li>
   </ul>
+
   <div v-if="editingUser !== null">
     <h2>Edit User</h2>
     <form @submit.prevent="saveUser">
@@ -25,8 +28,8 @@
         <input type="text" id="name" v-model="editedUser.name" />
       </div>
       <div>
-        <label for="age">Age:</label>
-        <input type="number" id="age" v-model.number="editedUser.age" />
+        <label for="website">website:</label>
+        <input type="text" id="website" v-model.number="editedUser.website" />
       </div>
       <button type="submit">Save</button>
       <button type="button" @click="cancelEdit">Cancel</button>
@@ -37,23 +40,23 @@
 <script>
 import HelloWorld from './components/HelloWorld.vue'
 import AppButton from './components/AppButton.vue';
+import TextField from './components/TextField.vue';
+import axios from "axios";
 
 export default {
   name: 'App',
   components: {
-    HelloWorld, AppButton
+    HelloWorld, AppButton, TextField
   },
   data() {
     return {
       counter: 0,
-      users: [
-        { name: "John Doe", age: 30 },
-        { name: "Jane Smith", age: 25 },
-        { name: "Bob Johnson", age: 40 },
-      ],
+      loading: false,
+      users: [],
       editingUser: null,
-      editedUser: { name: "", age: null },
-      addUser: { name: "", age: null },
+      editedUser: { name: "", website: "" },
+      user: { name: "", website: "" },
+
     };
   },
   methods: {
@@ -64,8 +67,10 @@ export default {
       this.counter--;
     },
     addUserToList() {
-      const newUser = { name: this.addUser.name, age: this.addUser.age }
-      this.users = [...this.users, newUser]
+      const newUser = { name: this.user.name, website: this.user.website }
+      this.users = [newUser, ...this.users]
+      this.user.name = ""
+      this.user.website = ""
     },
     editUser(index) {
       this.editingUser = index;
@@ -80,8 +85,22 @@ export default {
     },
     cancelEdit() {
       this.editingUser = null;
-      this.editedUser = { name: "", age: null };
+      this.editedUser = { name: "", website: "" };
     },
+  },
+  mounted() {
+    this.loading = true
+    axios
+      .get("https://jsonplaceholder.typicode.com/users")
+      .then((response) => {
+        this.loading = false
+        this.users = response.data;
+        console.log(response.data)
+      })
+      .catch((error) => {
+        this.loading = false
+        console.log(error);
+      });
   },
 }
 </script>
@@ -94,6 +113,13 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+.form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
 }
 
 ul li {
