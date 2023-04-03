@@ -1,5 +1,5 @@
 <template>
-    <button @click="handleClick">{{ label }}</button>
+    <button :type="type" @click="handleClick">{{ label }}</button>
 </template>
 
 <script>
@@ -7,7 +7,11 @@ export default {
     name: "AppButton",
     props: {
         label: String,
-        handleClick: Function
+        handleClick: Function,
+        type: {
+            type: String,
+            default: "button",
+        }
     }
 }
 </script>
