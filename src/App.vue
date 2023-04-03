@@ -6,6 +6,10 @@
   <AppButton label="Decrement" :handle-click="decrementCounter" />
 
   <h1>Users</h1>
+  <input type="text" placeholder="username" v-model="addUser.name" />
+  <input type="number" placeholder="age" v-model="addUser.age" />
+
+  <AppButton label="Add user" :handle-click="addUserToList" />
   <ul>
     <li v-for="(user, index) in users" :key="index">
       <p> {{ user.name }} - {{ user.age }}</p>
@@ -49,6 +53,7 @@ export default {
       ],
       editingUser: null,
       editedUser: { name: "", age: null },
+      addUser: { name: "", age: null },
     };
   },
   methods: {
@@ -57,6 +62,10 @@ export default {
     },
     decrementCounter() {
       this.counter--;
+    },
+    addUserToList() {
+      const newUser = { name: this.addUser.name, age: this.addUser.age }
+      this.users = [...this.users, newUser]
     },
     editUser(index) {
       this.editingUser = index;
@@ -95,6 +104,7 @@ ul li {
 }
 
 ul li p {
-  flex: 0.5
+  flex: 0.5;
+  text-align: left;
 }
 </style>
